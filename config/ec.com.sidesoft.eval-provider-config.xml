@@ -2,7 +2,7 @@
  <provider>
    <bean>
        <name>doIt</name>
-       <class>ec.com.sidesoft.eval.service.Invoices.OrdersToCompletetWebService</class>
+       <class>ec.com.sidesoft.eval.ws.OrdersToCompletetWebService</class>
        <singleton>true</singleton>
    </bean>
  </provider>
