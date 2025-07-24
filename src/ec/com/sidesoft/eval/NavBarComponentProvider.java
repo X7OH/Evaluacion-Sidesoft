@@ -36,10 +36,12 @@ public class NavBarComponentProvider extends BaseComponentProvider {
   @Override
   public List<ComponentResource> getGlobalComponentResources() {
     final String prefix = "web/ec.com.sidesoft.eval";
-
     final List<ComponentResource> globalResources = new ArrayList<ComponentResource>();
     globalResources.add(createStaticResource(
-        "/opt/openbravo/estandar/modules/ec.com.sidesoft.eval/src/templates/Navbar.js.ftl", false));
+        "/opt/openbravo/estandar/modules/ec.com.sidesoft.eval/src/ec/com/sidesoft/eval/templates/Navbar.js.ftl", false));
+        
+    globalResources.add(createStaticResource(
+        "/opt/openbravo/estandar/modules/ec.com.sidesoft.eval/web/ec.com.sidesoft.eval/js/statusColor.js", false));
 
     globalResources.add(createStaticResource(prefix + "/js/order-ev-field.js", false));
     return globalResources;

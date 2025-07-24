@@ -32,7 +32,6 @@ public class NavBarComponent extends BaseTemplateComponent {
     
     public static final String NAV_BAR_COMPONENT_ID = "ExampleView";
 
-
 	@Override
     public Map<String, Object> getData() {
         Map<String, Object> data = new HashMap<>();
