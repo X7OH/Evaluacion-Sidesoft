@@ -13,37 +13,36 @@ import org.openbravo.client.kernel.ComponentProvider;
 import org.openbravo.client.kernel.KernelConstants;
 
  
-// @ApplicationScoped
-// @ComponentProvider.Qualifier(ExampleComponentProvider.EXAMPLE_VIEW_COMPONENT_TYPE)
- 
+@ApplicationScoped
+@ComponentProvider.Qualifier(NavBarComponentProvider.EXAMPLE_VIEW_COMPONENT_TYPE) 
+public class NavBarComponentProvider extends BaseComponentProvider { 
 
-public class NavBarComponentProvider extends BaseComponentProvider {
-  public static final String COMPONENT_TYPE = "ec.com.sidesoft.app.login.login_Resources";
-  
+	public static final String EXAMPLE_VIEW_COMPONENT_TYPE = "OBEXAPP_OrderBPartnerViewType";
+	
+	  @Override
+	  public Component getComponent(String componentId, Map<String, Object> parameters) {
+	    if (componentId.equals(NavBarViewComponent.EXAMPLE_VIEW_COMPONENT_ID)) {
+	      NavBarViewComponent component = new NavBarViewComponent();
+	      component.setId(NavBarViewComponent.EXAMPLE_VIEW_COMPONENT_ID);
+	      component.setParameters(parameters);
+	      return component;
+	    }
+	    throw new IllegalArgumentException("Component id " + componentId + " not supported.");
+	  }
 
-  @Override
-  public Component getComponent(String componentId, Map<String, Object> parameters) {
-
-    if (componentId.equals(NavBarComponent.NAV_BAR_COMPONENT_ID)) {
-      final NavBarComponent component = new NavBarComponent();
-      component.setId(NavBarComponent.NAV_BAR_COMPONENT_ID);
-      component.setParameters(parameters);
-      return component;
-    } 
-    throw new IllegalArgumentException("Component id " + componentId + " not supported.");
-  }
 
   @Override
   public List<ComponentResource> getGlobalComponentResources() {
     final String prefix = "web/ec.com.sidesoft.eval";
     final List<ComponentResource> globalResources = new ArrayList<ComponentResource>();
-    globalResources.add(createStaticResource(
-        "/opt/openbravo/estandar/modules/ec.com.sidesoft.eval/src/ec/com/sidesoft/eval/templates/Navbar.js.ftl", false));
+    // globalResources.add(createStaticResource(
+    //     "ec/com/sidesoft/eval/templates/Navbar.js.ftl", false));
         
-    globalResources.add(createStaticResource(
-        "/opt/openbravo/estandar/modules/ec.com.sidesoft.eval/web/ec.com.sidesoft.eval/js/statusColor.js", false));
+    globalResources.add(createStaticResource( prefix + "/js/statusColor.js", false));
 
-    globalResources.add(createStaticResource(prefix + "/js/order-ev-field.js", false));
+    globalResources.add(createStaticResource(prefix + "/js/nav-bar-button.js", false));
+    globalResources.add(createStaticResource(prefix + "/js/bpinfo-onchange.js", false));
+    
     return globalResources;
   }
 

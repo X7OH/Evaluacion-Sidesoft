@@ -27,38 +27,91 @@
 //   }
 // }
 // isc.ClassFactory.defineClass('OBEXAPP_NavBarEvView', isc.Layout);
- isc.Page.setEvent('load', function () {
-    if (!window.OB || !OB.Application || !OB.Layout) {
-      if (attemptCount < MAX_ATTEMPTS) {
-        isc.Timer.setTimeout(applyAllCustomizations, 200);
-      } else {
-        console.warn("OB no se cargó después de varios intentos");
-      }
-      return;
-    }
+//  isc.Page.setEvent('load', function () {
+//     if (!window.OB || !OB.Application || !OB.Layout) {
+//       if (attemptCount < MAX_ATTEMPTS) {
+//         isc.Timer.setTimeout(applyAllCustomizations, 200);
+//       } else {
+//         console.warn("OB no se cargó después de varios intentos");
+//       }
+//       return;
+//     }
     
-    isc.Button.create({
-        baseStyle: 'navBarButton',
-        title: OB.I18N.getLabel('OBToolbarNavBarEv'),
-        overflow: "visible",
-        width: 100,
-        layoutAlign: "center",
-        showRollOver: false,
-        showFocused: false,
-        showDown: false,
-        click: function() {
-            isc.show(isc.OBEXAPP_NavBarEvView.create({
-                windowTitle: OB.I18N.getLabel('OBToolbarNavBarEv'),
-                windowContent: 'Datos Facturados: ${data.ordersCount} <br> ' +
-                                'Nombre del cliente: ${data.name}' +
-                                '<br> ' +
-                                'Total de la factura: ${data.totalAmount}'
-            }));
+//     isc.Button.create({
+//         baseStyle: 'navBarButton',
+//         title: OB.I18N.getLabel('OBToolbarNavBarEv'),
+//         overflow: "visible",
+//         width: 100,
+//         layoutAlign: "center",
+//         showRollOver: false,
+//         showFocused: false,
+//         showDown: false,
+//         click: function() {
+//             isc.show(isc.OBEXAPP_NavBarEvView.create({
+//                 windowTitle: OB.I18N.getLabel('OBToolbarNavBarEv'),
+//                 windowContent: 'Datos Facturados: ${data.ordersCount} <br> ' +
+//                                 'Nombre del cliente: ${data.name}' +
+//                                 '<br> ' +
+//                                 'Total de la factura: ${data.totalAmount}'
+//             }));
+//         }
+
+//     });
+// });
+
+
+(function () {
+  var buttonProps = {
+    action: function () {
+      var view = this.view,
+          form = view.viewForm,
+          businessPartnerId = form.getItemValue('C_BPartner_ID');
+
+      if (!businessPartnerId) {
+        isc.say(OB.I18N.getLabel('OBEXAPP_NoPartnerSelected'));
+        return;
+      }
+
+      OB.RemoteCallManager.call('ec.com.sidesoft.eval.NavBarComponent', {
+        businessPartnerId: businessPartnerId
+      }, function (response) {
+        if (!response.orders || response.orders.length === 0) {
+          isc.say(OB.I18N.getLabel('OBEXAPP_NoOrdersFound'));
+          return;
         }
 
-    });
-});
-	
+        var msg = "<b>" + OB.I18N.getLabel('OBEXAPP_PendingInvoices') + "</b><br><br>";
+        var total = 0;
+
+        response.orders.forEach(function (invoice) {
+          msg += OB.I18N.getLabel('OBEXAPP_Customer') + ": " + invoice.name + "<br>";
+          msg += OB.I18N.getLabel('OBEXAPP_Status') + ": " + invoice.docstatus + "<br>";
+          msg += OB.I18N.getLabel('OBEXAPP_Total') + ": " + invoice.grandtotal + "<br><br>";
+          total += isNaN(parseFloat(invoice.grandtotal)) ? 0 : parseFloat(invoice.grandtotal);
+        });
+
+        msg += "<b>" + OB.I18N.getLabel('OBEXAPP_TotalPending') + ": " + total.toFixed(2) + "</b>";
+        isc.say(msg, null, {width: 400});
+      });
+    },
+    buttonType: 'OBEXAPP_PartnerInvoices',
+    prompt: OB.I18N.getLabel('OBEXAPP_ViewPartnerInvoices'),
+    updateState: function () {
+      var form = this.view.viewForm;
+      this.setDisabled(!form || form.isNew || !form.getItemValue('C_BPartner_ID'));
+    }
+  };
+
+  OB.ToolbarRegistry.registerButton(
+    buttonProps.buttonType,
+    isc.OBToolbarIconButton,
+    buttonProps,
+    100,
+    '123' // ID de la pestaña Business Partner
+  );
+})();
+
+
 // isc.defineClass("OBEXAPP_NavBarEvWindow", "Window").addProperties({
 //   keepInParentRect: true,
 //   canDragReposition: true,

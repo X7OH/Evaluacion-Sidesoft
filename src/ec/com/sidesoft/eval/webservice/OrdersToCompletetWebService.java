@@ -1,4 +1,4 @@
-package ec.com.sidesoft.eval.ws;
+package ec.com.sidesoft.eval.webservice;
 
 import org.openbravo.base.secureApp.HttpSecureAppServlet;
 import org.openbravo.database.ConnectionProvider;
@@ -21,13 +21,9 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
-
+ 
 import org.openbravo.service.web.WebService;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 
 public class OrdersToCompletetWebService implements WebService{
@@ -58,7 +54,7 @@ public class OrdersToCompletetWebService implements WebService{
     invoiceJson.put("id", invoice.getId());
     invoiceJson.put("documentNo", invoice.getDocumentNo());
     invoiceJson.put("businessPartner", invoice.getBusinessPartner().getName());
-    invoiceJson.put("dateInvoiced", invoice.getInvoiceDate());
+    invoiceJson.put("dateInvoiced", invoice.getInvoiceDate()); 
     // Agrega más campos según lo que necesites exponer
     invoicesArray.put(invoiceJson);
   } 

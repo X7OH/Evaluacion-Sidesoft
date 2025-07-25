@@ -28,24 +28,25 @@
 // });
 
 isc.defineClass("OrderStatus", isc.Label);
-isc.OrderStatusSemaforo.addProperties({
+isc.OrderStatus.addProperties({
+  // record: sctaccEvOrderEst,
   height: 1,
   width: '100%',
   initWidget: function () {
     if (this.record) {
-      this.createField(this.record.sSctaccOrderStatus); // Cambia 'estadoOR' por el nombre real del campo
+      this.createField(this.record.sctaccEvOrderEst); // Cambia 'estadoOR' por el nombre real del campo
     }
     this.Super("initWidget", arguments);
   },
-  createField: function (docStatus) {
+  createField: function (sctaccEvOrderEst) {
     var backGroundColor = "#e9f0ef",
       align = "center";
-    // Asigna colores según el valor de docstatus
-    if (docStatus === "CO") { // Completado
+    // Asigna colores según el valor de sctaccEvOrderEst
+    if (sctaccEvOrderEst === "CO") { // Completado
       backGroundColor = "#00FF00";
-    } else if (docStatus === "DR") { // Borrador
+    } else if (sctaccEvOrderEst === "DR") { // Borrador
       backGroundColor = "#ffdf00";
-    } else if (docStatus === "VO") { // Anulado
+    } else if (sctaccEvOrderEst === "VO") { // Anulado
       backGroundColor = "#ff0000";
     }
     this.setBackgroundColor(backGroundColor);
