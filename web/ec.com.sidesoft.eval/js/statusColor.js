@@ -38,15 +38,15 @@ isc.OrderStatus.addProperties({
     }
     this.Super("initWidget", arguments);
   },
-  createField: function (sctaccEvOrderEst) {
+  createField: function (code) {
     var backGroundColor = "#e9f0ef",
       align = "center";
     // Asigna colores según el valor de sctaccEvOrderEst
-    if (sctaccEvOrderEst === "CO") { // Completado
+    if (code === "CO") { // Completado
       backGroundColor = "#00FF00";
-    } else if (sctaccEvOrderEst === "DR") { // Borrador
+    } else if (code === "DR") { // Borrador
       backGroundColor = "#ffdf00";
-    } else if (sctaccEvOrderEst === "VO") { // Anulado
+    } else if (code === "VO") { // Anulado
       backGroundColor = "#ff0000";
     }
     this.setBackgroundColor(backGroundColor);

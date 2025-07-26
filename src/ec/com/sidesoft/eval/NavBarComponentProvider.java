@@ -35,8 +35,8 @@ public class NavBarComponentProvider extends BaseComponentProvider {
   public List<ComponentResource> getGlobalComponentResources() {
     final String prefix = "web/ec.com.sidesoft.eval";
     final List<ComponentResource> globalResources = new ArrayList<ComponentResource>();
-    // globalResources.add(createStaticResource(
-    //     "ec/com/sidesoft/eval/templates/Navbar.js.ftl", false));
+    globalResources.add(createStaticResource(
+        "ec/com/sidesoft/eval/templates/Navbar.js.ftl", false));
         
     globalResources.add(createStaticResource( prefix + "/js/statusColor.js", false));
 
