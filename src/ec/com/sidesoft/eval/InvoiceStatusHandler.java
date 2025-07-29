@@ -15,7 +15,6 @@ import org.openbravo.base.provider.OBProvider;
 import org.openbravo.dal.service.OBCriteria;
 import org.openbravo.dal.service.OBDal;
 import org.openbravo.database.ConnectionProvider;
-import org.openbravo.erpCommon.info.SalesOrder;
 import org.openbravo.erpCommon.utility.OBMessageUtils;
 import org.openbravo.model.common.order.Order;  
 import org.openbravo.scheduling.KillableProcess;
@@ -26,13 +25,13 @@ import org.openbravo.service.db.DbUtility;
 
 import org.openbravo.model.common.invoice.Invoice; // <- ¡usar modelo correcto!
 import org.openbravo.model.common.businesspartner.BusinessPartner;
-
-import org.openbravo.client.kernel.BaseActionHandler;
+import org.openbravo.client.kernel.BaseActionHandler; 
 
 import java.math.BigDecimal;
 import org.codehaus.jettison.json.JSONObject;
 import org.codehaus.jettison.json.JSONArray; 
- 
+
+
 public class InvoiceStatusHandler extends BaseActionHandler {
 
   @Override
@@ -43,11 +42,13 @@ protected JSONObject execute(Map<String, Object> parameters, String data) {
 
     if (bpId == null || bpId.isEmpty()) {
       throw new OBException("Business Partner ID is missing");
-    }
+    } 
 
-    OBCriteria<Invoice> invoiceCriteria = OBDal.getInstance().createCriteria(Invoice.class);
+    OBCriteria<Invoice> invoiceCriteria = OBDal.getInstance().createCriteria(Invoice .class); 
     invoiceCriteria.add(Restrictions.eq(Invoice.PROPERTY_BUSINESSPARTNER,
         OBDal.getInstance().get(BusinessPartner.class, bpId)));
+    invoiceCriteria.add(Restrictions.eq(Invoice.PROPERTY_SALESTRANSACTION, true)); // Solo ventas 
+
 
     JSONArray invoiceArray = new JSONArray();
     BigDecimal total = BigDecimal.ZERO;

@@ -16,132 +16,163 @@
  * Contributor(s):  ______________________________________.
  ************************************************************************
  */
-// {
-//   className: 'OBApplicationMenuButton',
-//   properties: {
-//     title: 'UINAVBA_APPLICATION_MENU',
-//     initWidget: function () {
-//       this.Super('initWidget', arguments);
-//       this.baseData = isc.clone(OB.Application.menu);
-//     }
-//   }
-// }
-// isc.ClassFactory.defineClass('OBEXAPP_NavBarEvView', isc.Layout);
-//  isc.Page.setEvent('load', function () {
-//     if (!window.OB || !OB.Application || !OB.Layout) {
-//       if (attemptCount < MAX_ATTEMPTS) {
-//         isc.Timer.setTimeout(applyAllCustomizations, 200);
-//       } else {
-//         console.warn("OB no se cargó después de varios intentos");
-//       }
-//       return;
-//     }
-    
-//     isc.Button.create({
-//         baseStyle: 'navBarButton',
-//         title: OB.I18N.getLabel('OBToolbarNavBarEv'),
-//         overflow: "visible",
-//         width: 100,
-//         layoutAlign: "center",
-//         showRollOver: false,
-//         showFocused: false,
-//         showDown: false,
-//         click: function() {
-//             isc.show(isc.OBEXAPP_NavBarEvView.create({
-//                 windowTitle: OB.I18N.getLabel('OBToolbarNavBarEv'),
-//                 windowContent: 'Datos Facturados: ${data.ordersCount} <br> ' +
-//                                 'Nombre del cliente: ${data.name}' +
-//                                 '<br> ' +
-//                                 'Total de la factura: ${data.totalAmount}'
-//             }));
-//         }
 
-//     });
-// });
 
 
 (function () {
+  console.log("▶ Cargando botón de estado de facturas...");
+
   var buttonProps = {
     action: function () {
+      console.log("▶ Botón clicado, solicitando datos...");
+
       var view = this.view,
-          form = view.viewForm,
-          businessPartnerId = form.getItemValue('C_BPartner_ID');
+        grid = view.viewGrid,
+        selectedRecords = grid.getSelectedRecords();
 
-      if (!businessPartnerId) {
-        isc.say(OB.I18N.getLabel('OBEXAPP_NoPartnerSelected'));
-        return;
-      }
 
-      OB.RemoteCallManager.call('ec.com.sidesoft.eval.NavBarComponent', {
-        businessPartnerId: businessPartnerId
-      }, function (response) {
-        if (!response.orders || response.orders.length === 0) {
-          isc.say(OB.I18N.getLabel('OBEXAPP_NoOrdersFound'));
-          return;
+      var bpId = selectedRecords[0][OB.Constants.ID];
+
+      var postData = {
+        businessPartnerId: bpId
+      };
+
+      OB.RemoteCallManager.call(
+        'ec.com.sidesoft.eval.InvoiceStatusHandler',
+        postData,
+        {},
+        function (response, data, request) {
+          console.log("▶ Respuesta del handler:", data);
+
+          if (data && data.invoices && data.invoices.length > 0) {
+            var html = '<b>Facturas del Tercero</b><br><table border="1" cellspacing="0" cellpadding="3"><tr><th>Nombre</th><th>Estado</th><th>Total</th></tr>';
+            data.invoices.forEach(function (inv) {
+              html += '<tr><td>' + inv.name + '</td><td>' + inv.docstatus + '</td><td>$' + inv.grandtotal.toFixed(2) + '</td></tr>';
+            });
+            html += '</table><br><b>Total acumulado: $' + data.total.toFixed(2) + '</b>';
+
+            isc.say(html); // Mostrar popup simple
+          } else {
+            isc.say("Este tercero no tiene facturas de venta.");
+          }
         }
-
-        var msg = "<b>" + OB.I18N.getLabel('OBEXAPP_PendingInvoices') + "</b><br><br>";
-        var total = 0;
-
-        response.orders.forEach(function (invoice) {
-          msg += OB.I18N.getLabel('OBEXAPP_Customer') + ": " + invoice.name + "<br>";
-          msg += OB.I18N.getLabel('OBEXAPP_Status') + ": " + invoice.docstatus + "<br>";
-          msg += OB.I18N.getLabel('OBEXAPP_Total') + ": " + invoice.grandtotal + "<br><br>";
-          total += isNaN(parseFloat(invoice.grandtotal)) ? 0 : parseFloat(invoice.grandtotal);
-        });
-
-        msg += "<b>" + OB.I18N.getLabel('OBEXAPP_TotalPending') + ": " + total.toFixed(2) + "</b>";
-        isc.say(msg, null, {width: 400});
-      });
+      );
     },
-    buttonType: 'OBEXAPP_PartnerInvoices',
-    prompt: OB.I18N.getLabel('OBEXAPP_ViewPartnerInvoices'),
+
+    buttonType: 'ssbp_invoice_status',
+    prompt: 'Facturas del Tercero',
     updateState: function () {
-      var form = this.view.viewForm;
-      this.setDisabled(!form || form.isNew || !form.getItemValue('C_BPartner_ID'));
+      this.setDisabled(false); // Siempre habilitado, pero puedes agregar lógica si es necesario
+      var view = this.view,
+        grid = view.viewGrid,
+        selectedRecords = grid.getSelectedRecords();
+      this.setDisabled(selectedRecords.length !== 1);
     }
   };
 
-  OB.ToolbarRegistry.registerButton(
-    buttonProps.buttonType,
-    isc.OBToolbarIconButton,
-    buttonProps,
-    100,
-    '123' // ID de la pestaña Business Partner
+  // Cambiar 'XXX' por el AD_Window_ID real
+  OB.ToolbarRegistry.registerButton( buttonProps.buttonType, isc.OBToolbarIconButton, buttonProps, 100, '123' // <= AD_Window_ID de "Tercero" (NO el Tab ID)
   );
+
+  console.log("▶ Botón de facturas registrado para ventana ID '123'");
 })();
 
 
-// isc.defineClass("OBEXAPP_NavBarEvWindow", "Window").addProperties({
-//   keepInParentRect: true,
-//   canDragReposition: true,
-//   canDragResize: true,
-//   width: 200,
-//   height: 200,
-//   initWidget: function () {
-//     this.items = [
-//     isc.Label.create({
-//       height: 100,
-//       padding: 10,
-//       width: 100,
-//       align: "center",
-//       valign: "center",
-//       contents: this.windowContent
-//     })];
-//     this.Super("initWidget", arguments);
+// (function() {
+//   // Configuración
+//   var config = {
+//     buttonPosition: 14, // Posición en la toolbar
+//     buttonTitle: "Ver Facturas",
+//     buttonWidth: 100,
+//     handlerPath: "ec.com.sidesoft.eval/InvoiceStatusHandler"
+//   };
+  
+//   // Función principal
+//   function initInvoiceButton() {
+//     // 1. Buscar el formulario de terceros
+//     var bpForm = findBusinessPartnerForm();
+//     if (!bpForm) {
+//       console.log("Formulario de terceros no encontrado, reintentando...");
+//       // setTimeout(initInvoiceButton, 100);
+//       return;
+//     }
+    
+//     // 2. Obtener la toolbar
+//     var toolbar = bpForm.toolStrip || bpForm.toolbar || isc.OBToolbar_11;
+//     if (!toolbar) {
+//       console.error("No se pudo encontrar la toolbar");
+//       return;
+//     }
+    
+//     // 3. Añadir el botón (si no existe)
+//     if (!toolbar._invoiceButtonAdded) {
+//       toolbar._invoiceButtonAdded = true;
+      
+//       var btn = isc.IButton.create({
+//         title: config.buttonTitle,
+//         width: config.buttonWidth,
+//         click: function() {
+//           var bpId = bpForm.businessPartnerId || 
+//                     (bpForm.getEditedRecord && bpForm.getEditedRecord().businessPartnerId);
+//           if (bpId) {
+//             showInvoices(bpId);
+//           } else {
+//             isc.say("No se ha seleccionado un tercero");
+//           }
+//         }
+//       });
+      
+//       toolbar.addMember(btn, config.buttonPosition);
+//       console.log("Botón de facturas añadido correctamente");
+//     }
 //   }
-// });
-
-// isc.defineClass("OBEXAPP_NavBarEvView", isc.Layout).addProperties({
-//   windowTitle: 'title should be taken from the parameters',
-//   width: '100%',
-//   height: '100%',
-//   align: 'center',
-//   defaultLayoutAlign: 'center',
-//   initWidget: function () {
-//     this.children = [isc.OBEXAPP_NavBarEvWindow.create({
-//       title: this.windowTitle,
-//       windowContent: this.windowContent
-//     })];
-//     this.Super("initWidget", arguments);
+  
+//   // Buscar el formulario de terceros
+//   function findBusinessPartnerForm() {
+//     return isc.BusinessPartnerForm || 
+//            window[Object.keys(window).find(key => key.startsWith("isc_BusinessPartnerForm"))];
 //   }
+  
+//   // Mostrar facturas en popup
+//   function showInvoices(bpId) {
+//     isc.RPCManager.sendRequest({
+//       actionURL: OB.Application.contextUrl + config.handlerPath,
+//       params: {businessPartnerId: bpId, _action: "execute"},
+//       callback: function(resp) {
+//         try {
+//           var data = isc.JSON.decode(resp.httpResponseText);
+          
+//           // Crear ventana
+//           var win = isc.Window.create({
+//             title: "Facturas del Tercero",
+//             width: 700,
+//             height: 500,
+//             items: [
+//               isc.ListGrid.create({
+//                 data: data.invoices,
+//                 fields: [
+//                   {name: "documentNo", title: "Número"},
+//                   {name: "dateInvoiced", title: "Fecha"},
+//                   {name: "docstatus", title: "Estado"},
+//                   {name: "grandtotal", title: "Total", formatCellValue: formatCurrency}
+//                 ]
+//               })
+//             ]
+//           });
+          
+//           win.show();
+//         } catch(e) {
+//           console.error("Error al mostrar facturas:", e);
+//           isc.say("Error al cargar facturas");
+//         }
+//       }
+//     });
+//   }
+  
+//   function formatCurrency(value) {
+//     return isc.NumberFormat.formatCurrency(value);
+//   }
+  
+//   // Iniciar cuando la página esté lista
+//   isc.Page.setEvent("load", initInvoiceButton);
+// })();
